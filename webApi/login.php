@@ -1,20 +1,9 @@
 <?php
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (!isset($_POST["referer"])) {
-        echo "Deve ser informado o url de retorno com o nome \"referer\"";
-        die();
-    }
-
     session_start();
     $username = $_POST["username"];
     $password = $_POST["password"];
-    
-    $login_data = [
-        "username" => $username,
-        "password" => $password
-    ];
-    $_SESSION["login_data"] = $login_data;
 
     require_once "includes/dbh.inc.php";
     require_once "includes/model.inc.php";
@@ -34,15 +23,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $errors[] = "Senha incorreta";
     }
 
-    header("Location: ".$_POST["referer"]);
-
-    if ($errors) {
-        $_SESSION["login_errors"] = $errors;
-    }
-    else {
-        unset($_SESSION["login_data"]);
+    if (empty($errors)) {
         $control->login_user();
     }
+
+    ?>
+    {
+        "erros": [<?php
+            if ($errors) {
+
+                for ($i = 0; $i < count($errors) - 1; $i++) {
+                    echo '"'.$errors[$i].'",';
+                }
+                echo '"'.$errors[count($errors) - 1].'"';
+            }
+        ?>]
+    }
+    <?php
+
     $conn = null;
     
     die();

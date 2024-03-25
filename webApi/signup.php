@@ -1,20 +1,9 @@
 <?php
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (!isset($_POST["referer"])) {
-        echo "Deve ser informado o url de retorno com o nome \"referer\"";
-        die();
-    }
-    
+if ($_SERVER["REQUEST_METHOD"] == "POST") {    
     session_start();
     $username = $_POST["username"];
     $password = $_POST["password"];
-    
-    $signup_data = [
-        "username" => $username,
-        "password" => $password
-    ];
-    $_SESSION["signup_data"] = $signup_data;
 
     require_once "includes/dbh.inc.php";
     require_once "includes/model.inc.php";
@@ -35,17 +24,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
 
-    header("Location: ".$_POST["referer"]);
-
-    if ($errors) {
-        $_SESSION["signup_errors"] = $errors;
-    }
-    else {        
-        unset($_SESSION["signup_data"]);
-        
+    if (empty($errors)) {                
         $control->create_user();
         $control->login_user();
     }
+
+    ?>
+    {
+        "erros": [<?php
+            if ($errors) {
+
+                for ($i = 0; $i < count($errors) - 1; $i++) {
+                    echo '"'.$errors[$i].'",';
+                }
+                echo '"'.$errors[count($errors) - 1].'"';
+            }
+                
+            ?>]
+    }
+    <?php
     
     $conn = null;
     
