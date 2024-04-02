@@ -7,11 +7,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     require_once "includes/dbh.inc.php";
     require_once "includes/model.inc.php";
+    require_once "includes/view.inc.php";
     require_once "includes/ctrl.inc.php";
     
     $errors = [];
     
-    $control = new Control($conn, $username, $password);
+    $control = new UserControl($conn, $username, $password);
 
     if ($control->is_input_empty()) {
         $errors[] = "Preencha todos os campos";
@@ -27,20 +28,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $control->login_user();
     }
 
-    ?>
-    {
-        "erros": [<?php
-            if ($errors) {
-
-                for ($i = 0; $i < count($errors) - 1; $i++) {
-                    echo '"'.$errors[$i].'",';
-                }
-                echo '"'.$errors[count($errors) - 1].'"';
-            }
-        ?>]
-    }
-    <?php
-
+    echo '{"erros": ';
+    jsonErrors($errors);
+    echo '}';
+    
     $conn = null;
     
     die();

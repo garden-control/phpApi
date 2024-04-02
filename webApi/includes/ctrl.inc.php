@@ -5,7 +5,7 @@ declare(strict_types=1);
 require_once "model.inc.php";
 require_once "environments.inc.php";
 
-class Control {
+class UserControl {
     private ?User $user;
     private mysqli $conn;
     private string $username;
@@ -48,3 +48,35 @@ class Control {
     }
 }
 
+function add_estacao(mysqli $conn, string $id_estacao, string $nome): bool {
+    if (empty(get_usuario_estacao($conn, $id_estacao))) {
+        set_usuario_estacao($conn, $id_estacao, $nome);
+        return true;
+    }
+    return false;
+}
+
+//retorna um novo id válido de estação
+function get_novo_id_estacao(mysqli $conn): string {
+    $id_estacao;
+    //procurar um id válido
+    do {
+        $id_estacao = bin2hex(random_bytes(8));
+    } while (!empty(get_estacao($conn, $id_estacao)));
+
+    return $id_estacao;
+}
+
+//retorna o id da nova estação
+function add_nova_estacao(mysqli $conn, string $localizacao, string $nome): string {
+    
+    $id_estacao = get_novo_id_estacao($conn);
+
+    //criar nova estacao
+    set_estacao($conn, $id_estacao, $localizacao);
+    
+    //associa-la ao usuario
+    set_usuario_estacao($conn, $id_estacao, $nome);
+
+    return $id_estacao;
+}
