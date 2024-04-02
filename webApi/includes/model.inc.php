@@ -57,7 +57,7 @@ function set_user(mysqli $conn, string $username, string $password): ?User {
 
 class Leitura {
     public int $id;
-    public int $id_estacao;
+    public string $id_estacao;
     public float $umidade_ar;
     public float $temperatura;
     public float $umidade_solo;
@@ -146,7 +146,10 @@ function get_usuario_estacao(mysqli $conn, string $id_estacao): array {
     $stmt->execute();
     $result = $stmt->get_result();
     if ($result !== false) {
-        return $result->fetch_assoc();
+        $row = $result->fetch_assoc();
+        if ($row) {
+            return $row;
+        }
     }
     return [];
 }

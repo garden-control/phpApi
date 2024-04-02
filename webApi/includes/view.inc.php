@@ -38,20 +38,20 @@ function jsonEstacoes(array $estacoes): void {
 
 function jsonLeitura(Leitura $leitura): void {
     ?>{
-        "id": <?php echo $leituras[$i]->id ?>,
-        "id_estacao": <?php echo $leituras[$i]->id_estacao ?>,
-        "umidade_ar": <?php echo $leituras[$i]->umidade_ar ?>,
-        "temperatura": <?php echo $leituras[$i]->temperatura ?>,
-        "umidade_solo": <?php echo $leituras[$i]->umidade_solo ?>,
-        "pluv_indice": <?php echo $leituras[$i]->pluv_indice ?>,
-        "horario": <?php echo '"'.$leituras[$i]->horario->format("H:i:s d-m-y").'"' ?>
+        "id": <?php echo $leitura->id ?>,
+        "id_estacao": <?php echo $leitura->id_estacao ?>,
+        "umidade_ar": <?php echo $leitura->umidade_ar ?>,
+        "temperatura": <?php echo $leitura->temperatura ?>,
+        "umidade_solo": <?php echo $leitura->umidade_solo ?>,
+        "pluv_indice": <?php echo $leitura->pluv_indice ?>,
+        "horario": <?php echo '"'.$leitura->horario->format("H:i:s d-m-y").'"' ?>
     }<?php
 }
 
 function jsonLeituras(array $leituras): void {
     echo '[';     
     for ($i = 0; $i < count($leituras); $i++) {
-        jsonLeitura($leituras[i]);
+        jsonLeitura($leituras[$i]);
 
         echo $i === count($leituras) - 1 ? "" : ",";
     }
