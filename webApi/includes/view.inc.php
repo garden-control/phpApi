@@ -19,18 +19,17 @@ function jsonErrors(array $errors): void {
 function jsonEstacao(Estacao $estacao): void {
 ?>
     {
-        "id": <?php echo $estacoes->id ?>,
-        "nome": <?php echo $estacoes->nome ?>,
-        "localizacao": "<?php echo $estacoes->localizacao ?>"
+        "id": "<?php echo $estacao->id ?>",
+        "nome": "<?php echo $estacao->nome ?>",
+        "localizacao": "<?php echo $estacao->localizacao ?>"
     }
 <?php
 }
 
 function jsonEstacoes(array $estacoes): void {
     echo '[';
-    $estacoes = get_estacoes($conn, isset($_GET["limite"]) ? $_GET["limite"] : 10);
     for ($i = 0; $i < count($estacoes); $i++) {
-        jsonEstacao($estacoes[i]);
+        jsonEstacao($estacoes[$i]);
         echo ($i == count($estacoes) - 1 ? "" : ",");
     }
     echo ']';
