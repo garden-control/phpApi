@@ -48,16 +48,22 @@ class UserControl {
     }
 }
 
-function add_estacao(mysqli $conn, string $id_estacao, string $nome): bool {
-    if (empty(get_usuario_estacao($conn, $id_estacao))) {
-        set_usuario_estacao($conn, $id_estacao, $nome);
-        return true;
+function add_usuario_estacao(array &$erros, mysqli $conn, string $id_estacao): void {
+    try {
+        set_usuario_estacao($conn, $id_estacao);
     }
-    return false;
+    catch (mysqli_sql_exception $e) {
+        if ($e->getCode() === 1062) {
+            $erros[] = "Estação já adicionada";
+        }
+        else {
+            $erros[] = "[SQL]\nErro: ".$e->getCode()."\nMensagem: ".$e->getMessage();
+        }
+    }
 }
 
 //retorna um novo id válido de estação
-function get_novo_id_estacao(mysqli $conn): string {
+function gerar_novo_id_estacao(mysqli $conn): string {
     $id_estacao;
     //procurar um id válido
     do {
@@ -68,15 +74,15 @@ function get_novo_id_estacao(mysqli $conn): string {
 }
 
 //retorna o id da nova estação
-function add_nova_estacao(mysqli $conn, string $localizacao, string $nome): string {
+function criar_nova_estacao(mysqli $conn, string $localizacao, string $nome): string {
     
-    $id_estacao = get_novo_id_estacao($conn);
+    $id_estacao = gerar_novo_id_estacao($conn);
 
     //criar nova estacao
-    set_estacao($conn, $id_estacao, $localizacao);
+    set_estacao($conn, $id_estacao, $localizacao, $nome);
     
     //associa-la ao usuario
-    set_usuario_estacao($conn, $id_estacao, $nome);
+    set_usuario_estacao($conn, $id_estacao);
 
     return $id_estacao;
 }
