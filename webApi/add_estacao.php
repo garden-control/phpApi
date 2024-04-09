@@ -13,25 +13,21 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
 
         $errors = [];
         $id_estacao = "";
-        $nome = "";
         $localizacao = "";
+        $nome = "";
 
         if (!isset($_GET["id_estacao"])) {
             $errors[] = "ID de estação não submetido";
         }
-        if (!isset($_GET["nome"])) {
-            $errors[] = "Nome de estação não submetido";
-        }
 
         if (empty($errors)) {
             $id_estacao = $_GET["id_estacao"];
-            $nome = $_GET["nome"];
             
-            if (!add_estacao($conn, $id_estacao, $nome)) {
-                $errors[] = "ID de estação já adicionado";
-                $nome = get_usuario_estacao($conn, $id_estacao)["nome"];
-            }
-            $localizacao = get_estacao($conn, $id_estacao)["localizacao"];
+            add_usuario_estacao($errors, $conn, $id_estacao);
+            
+            $estacao = get_estacao($conn, $id_estacao);
+            $localizacao = $estacao["localizacao"];
+            $nome = $estacao["nome"];
         }
 
         ?>
