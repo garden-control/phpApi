@@ -16,16 +16,16 @@ class User {
     }
     public static function make_from_row(array $row): User {
         return new User(
-            (int)$row[DB_USER_TABLE_FIELD_ID],
-            $row[DB_USER_TABLE_FIELD_USERNAME],
-            $row[DB_USER_TABLE_FIELD_PASSWORD]
+            (int)$row["id"],
+            $row["nome"],
+            $row["senha"]
         );
     }
 }
 
 function get_user(mysqli $conn, string $username): ?User {
 
-    $stmt = $conn->prepare("SELECT * FROM ".DB_USER_TABLE_NAME." WHERE ".DB_USER_TABLE_FIELD_USERNAME." = ?");
+    $stmt = $conn->prepare("SELECT * FROM usuario WHERE nome = ?");
     $stmt->bind_param('s', $username);
 
     $stmt->execute();
@@ -37,17 +37,15 @@ function get_user(mysqli $conn, string $username): ?User {
 
 function set_user(mysqli $conn, string $username, string $password): ?User {
     $stmt = $conn->prepare(
-        "INSERT INTO ".DB_USER_TABLE_NAME." 
-        (".DB_USER_TABLE_FIELD_USERNAME.", ".DB_USER_TABLE_FIELD_PASSWORD.")
-        VALUES (?, ?)"
+        "INSERT INTO usuario(nome, senha) VALUES (?, ?)"
     );
 
     $stmt->bind_param('ss', $username, $password);
 
     if ($stmt->execute()) {
         $result = $conn->query("
-            SELECT * FROM ".DB_USER_TABLE_NAME." 
-            WHERE ".DB_USER_TABLE_FIELD_USERNAME." = '".$username."'");
+            SELECT * FROM usuario 
+            WHERE nome = '".$username."'");
         if ($result !== false) {
             return User::make_from_row($result->fetch_assoc());
         }
@@ -104,7 +102,7 @@ class Estacao {
 
 function get_estacoes(mysqli $conn, int $limit): array {
     $stmt = $conn->prepare("
-        SELECT eu.id_estacao, eu.nome, e.localizacao FROM estacao_usuario AS eu
+        SELECT e.id, e.nome, e.localizacao FROM estacao_usuario AS eu
         JOIN estacao AS e ON e.id = eu.id_estacao
         WHERE id_usuario = ?
         LIMIT ?
@@ -116,7 +114,7 @@ function get_estacoes(mysqli $conn, int $limit): array {
     $estacoes = [];
     while ($row = $result->fetch_assoc()) {
         $estacao = new Estacao();
-        $estacao->id = $row["id_estacao"];
+        $estacao->id = $row["id"];
         $estacao->nome = $row["nome"];
         $estacao->localizacao = $row["localizacao"];
         $estacoes[] = $estacao;
@@ -129,16 +127,18 @@ function get_estacao(mysqli $conn, string $id_estacao): array {
     $stmt->bind_param("s", $id_estacao);
     $stmt->execute();
     $result = $stmt->get_result();
-    if ($result !== false) {
-        return $result->fetch_assoc();
+    $row = $result->fetch_assoc();
+    if ($row) {
+        return $row;
     }
     return [];
 }
 
-function set_estacao(mysqli $conn, string $id_estacao, string $localizacao): void {
-
+function set_estacao(mysqli $conn, string $id_estacao, string $localizacao, string $nome): void {
+    $stmt = $conn->prepare("INSERT INTO estacao(id, localizacao, nome) VALUES (?, ?, ?)");
+    $stmt->bind_param("sss", $id_estacao, $localizacao, $nome);
+    $stmt->execute();
 }
-
 
 function get_usuario_estacao(mysqli $conn, string $id_estacao): array {
     $stmt = $conn->prepare("SELECT * FROM estacao_usuario WHERE id_usuario = ? AND id_estacao = ?");
@@ -154,15 +154,11 @@ function get_usuario_estacao(mysqli $conn, string $id_estacao): array {
     return [];
 }
 
-function set_usuario_estacao(mysqli $conn, string $id_estacao, string $nome): bool {
+function set_usuario_estacao(mysqli $conn, string $id_estacao): void {
     $stmt = $conn->prepare("
-        INSERT INTO estacao_usuario(id_usuario, id_estacao, nome) VALUES 
-        (?, ?, ?)
+    INSERT INTO estacao_usuario(id_usuario, id_estacao) VALUES 
+    (?, ?)
     ");
-    $stmt->bind_param("iss", $_SESSION[SESSION_KEY_USER_ID], $id_estacao, $nome);
+    $stmt->bind_param("is", $_SESSION[SESSION_KEY_USER_ID], $id_estacao);
     $stmt->execute();
-    if ($stmt->get_result() === false) {
-        return false;
-    }
-    return true;
 }
