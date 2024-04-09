@@ -38,7 +38,7 @@ function jsonEstacoes(array $estacoes): void {
 function jsonLeitura(Leitura $leitura): void {
     ?>{
         "id": <?php echo $leitura->id ?>,
-        "id_estacao": <?php echo $leitura->id_estacao ?>,
+        "id_estacao": "<?php echo $leitura->id_estacao ?>",
         "umidade_ar": <?php echo $leitura->umidade_ar ?>,
         "temperatura": <?php echo $leitura->temperatura ?>,
         "umidade_solo": <?php echo $leitura->umidade_solo ?>,
