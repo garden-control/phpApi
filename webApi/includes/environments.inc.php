@@ -11,4 +11,7 @@ define("DB_PASSWORD", "");
 
 
 define("SESSION_KEY_USER_ID", "user_id");
+
+//Tamanho máximo do log do cli
+define("CLI_LOG_TAM_MAX", 15);
 ?>

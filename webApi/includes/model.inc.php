@@ -162,3 +162,64 @@ function set_usuario_estacao(mysqli $conn, string $id_estacao): void {
     $stmt->bind_param("is", $_SESSION[SESSION_KEY_USER_ID], $id_estacao);
     $stmt->execute();
 }
+
+function set_cli_entrada(mysqli $conn, string $id_estacao, string $mensagem): void {
+    $stmt = $conn ->prepare("
+        INSERT INTO cli_entrada(id_estacao, id_usuario, msg) VALUES
+        (?, ?, ?)
+    ");
+    $stmt->bind_param("sis", $id_estacao, $_SESSION[SESSION_KEY_USER_ID], $mensagem);
+    $stmt->execute();
+}
+
+function get_cli_log(mysqli $conn, string $id_estacao, int $id_msg_maior_q, int $limite): array {
+    $stmt = $conn->prepare("
+        SELECT id, msg FROM cli_log WHERE id_estacao = ? AND id_usuario = ? AND id > ? ORDER BY id DESC LIMIT ?
+    ");
+    $stmt->bind_param("siii", $id_estacao, $_SESSION[SESSION_KEY_USER_ID], $id_msg_maior_q, $limite);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result !== false) {
+        $decrescente = $result->fetch_all(MYSQLI_ASSOC);
+        $crescente = [];
+        for ($i = count($decrescente) - 1; $i >= 0; $i--) {
+            $crescente[] = $decrescente[$i];
+        }
+        return $crescente;
+    }
+    return [];
+}
+
+function set_cli_log(mysqli $conn, string $id_estacao, string $mensagem): void {
+    $stmt = $conn->prepare("
+        INSERT INTO cli_log(id_estacao, id_usuario, msg) VALUES
+        (?, ?, ?)
+    ");
+    $stmt->bind_param("sis", $id_estacao, $_SESSION[SESSION_KEY_USER_ID], $mensagem);
+    $stmt->execute();
+}
+
+function get_cli_log_tam(mysqli $conn, string $id_estacao): int {
+    $stmt = $conn->prepare("SELECT COUNT(id) AS tam FROM cli_log WHERE id_estacao = ? AND id_usuario = ?");
+    $stmt->bind_param("si", $id_estacao, $_SESSION[SESSION_KEY_USER_ID]);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result !== false) {
+        return (int)$result->fetch_assoc()["tam"];
+    }
+    return -1;
+}
+
+function delete_primeiros_from_cli_log(mysqli $conn, string $id_estacao, int $limite): void {
+    $stmt = $conn->prepare("
+        DELETE FROM cli_log 
+        WHERE id < ? + (
+            SELECT id FROM cli_log 
+            WHERE id_estacao = ? 
+            AND id_usuario = ? 
+            ORDER BY id 
+            LIMIT 1)
+    ");
+    $stmt->bind_param("isi", $limite, $id_estacao, $_SESSION[SESSION_KEY_USER_ID]);
+    $stmt->execute();
+}

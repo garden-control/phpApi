@@ -86,3 +86,15 @@ function criar_nova_estacao(mysqli $conn, string $localizacao, string $nome): st
 
     return $id_estacao;
 }
+
+function add_cli_entrada(mysqli $conn, string $id_estacao, string $mensagem): void {
+    
+    set_cli_log($conn, $id_estacao, $mensagem);
+    
+    $cli_log_tam = get_cli_log_tam($conn, $id_estacao);
+    if ($cli_log_tam > CLI_LOG_TAM_MAX) {
+        delete_primeiros_from_cli_log($conn, $id_estacao, $cli_log_tam - CLI_LOG_TAM_MAX);
+    }
+    
+    set_cli_entrada($conn, $id_estacao, $mensagem);
+}
