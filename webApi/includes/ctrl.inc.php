@@ -67,7 +67,7 @@ function gerar_novo_id_estacao(mysqli $conn): string {
     $id_estacao;
     //procurar um id válido
     do {
-        $id_estacao = bin2hex(random_bytes(8));
+        $id_estacao = bin2hex(random_bytes(4));
     } while (!empty(get_estacao($conn, $id_estacao)));
 
     return $id_estacao;
